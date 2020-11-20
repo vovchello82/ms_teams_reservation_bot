@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/infracloudio/msbotbuilder-go/core"
@@ -19,7 +20,7 @@ var enququeChan = make(chan string)
 var nextTurnNotificationChan = make(chan *schema.ConversationReference)
 var timeoutNotificationChan = make(chan *schema.ConversationReference)
 
-var webhook = ""
+var webhook = os.Getenv("WEBHOOK")
 
 // HTTPHandler handles the HTTP requests from then connector service
 type HTTPHandler struct {
