@@ -179,6 +179,8 @@ func NewTimedReservationQueue(timeout int) *ReservationQueue {
 					nextTurnNotificationChan <- nextReservation.Value.(*schema.ConversationReference)
 					timer.Reset(duration)
 					running = true
+				} else {
+					nextTurnNotificationChan <- nil
 				}
 			case id := <-deququeChan:
 				element := reservation_quque.findElementByConversationId(id)
