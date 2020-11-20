@@ -1,2 +1,2 @@
-# ms_teams_reservation_bot
-Queuing Bot for MS Teams
+# reservation_bot
+reservation bot for MS teams 
