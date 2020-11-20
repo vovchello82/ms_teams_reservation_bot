@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/infracloudio/msbotbuilder-go/core"
@@ -20,13 +21,14 @@ var enququeChan = make(chan string)
 var nextTurnNotificationChan = make(chan *schema.ConversationReference)
 var timeoutNotificationChan = make(chan *schema.ConversationReference)
 
-var webhook = os.Getenv("WEBHOOK")
+var webhook = os.Getenv("BOT_WEBHOOK")
 
 // HTTPHandler handles the HTTP requests from then connector service
 type HTTPHandler struct {
 	core.Adapter
 	activity.HandlerFuncs
 	*ReservationQueue
+	timeout int
 }
 
 func (ht *HTTPHandler) OnMessageFunc(turn *activity.TurnContext) (schema.Activity, error) {
@@ -56,7 +58,7 @@ func (ht *HTTPHandler) OnMessageFunc(turn *activity.TurnContext) (schema.Activit
 		}
 		ht.enquque(ref)
 	} else if message == "info" {
-		answer = fmt.Sprintf("There are %d reservations in the quque", lenght)
+		answer = fmt.Sprintf("The timeout is %d seconds. There are %d reservations in the quque", ht.timeout, lenght)
 		for e := ht.Front(); e != nil; e = e.Next() {
 			answer += fmt.Sprintf(" ->%s", e.Value.(*schema.ConversationReference).User.Name)
 		}
@@ -85,9 +87,15 @@ func (ht *HTTPHandler) processMessage(w http.ResponseWriter, req *http.Request) 
 
 func NewHTTPHandler(adapter core.Adapter) *HTTPHandler {
 
-	quque := NewTimedReservationQueue(15)
+	timeout, err := strconv.Atoi(os.Getenv("BOT_TIMEOUT"))
 
-	ht := &HTTPHandler{adapter, activity.HandlerFuncs{}, quque}
+	if err != nil {
+		timeout = 15
+	}
+
+	quque := NewTimedReservationQueue(timeout)
+
+	ht := &HTTPHandler{adapter, activity.HandlerFuncs{}, quque, timeout}
 	ht.HandlerFuncs.OnMessageFunc = ht.OnMessageFunc
 
 	go func() {
