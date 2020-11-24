@@ -238,7 +238,10 @@ func (rq *ReservationQueue) enquque(conversation *schema.ConversationReference) 
 
 func main() {
 
-	setting := core.AdapterSetting{}
+	setting := core.AdapterSetting{
+		AppID:       os.Getenv("APP_ID"),
+		AppPassword: os.Getenv("APP_PASSWORD"),
+	}
 
 	adapter, err := core.NewBotAdapter(setting)
 	if err != nil {
